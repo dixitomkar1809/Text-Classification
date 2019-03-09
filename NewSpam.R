@@ -11,6 +11,36 @@ rawInputData <- read.csv("http://www.utdallas.edu/~ond170030/data/SMSSpamCollect
 colnames(rawInputData) <- c("Type", "Text")
 rawInputData <- subset(rawInputData, select = c("Type", "Text"))
 
+# Lets just see the words that have a very high frequency
+corpusFull <- VCorpus(VectorSource(rawInputData$Text))
+corpusFull <- tm_map(corpusFull, removeNumbers)
+corpusFull <- tm_map(corpusFull, removePunctuation)
+corpusFull <- tm_map(corpusFull, removeWords, stopwords())
+corpusFull <- tm_map(corpusFull, stripWhitespace)
+corpusFull <- tm_map(corpusFull, stemDocument)
+wordcloud(corpusFull, min.freq = 100, random.order = FALSE, color = (colors = c("#4575b4","#74add1","#abd9e9","#e0f3f8","#fee090","#fdae61","#f46d43","#d73027")))
+
+# Lets just see the words that have a very high frequency in the sms that are marked as legit
+legitSMS <-subset(rawInputData, rawInputData$Type=="ham")
+corpusLegit <- VCorpus(VectorSource(legitSMS$Text))
+corpusLegit <- tm_map(corpusLegit, removeNumbers)
+corpusLegit <- tm_map(corpusLegit, removePunctuation)
+corpusLegit <- tm_map(corpusLegit, removeWords, stopwords())
+corpusLegit <- tm_map(corpusLegit, stripWhitespace)
+corpusLegit <- tm_map(corpusLegit, stemDocument)
+wordcloud(corpusLegit, min.freq = 100, random.order = FALSE, color = (colors = c("#4575b4","#74add1","#abd9e9","#e0f3f8","#fee090","#fdae61","#f46d43","#d73027")))
+
+# Lets just see the words that have a very high frequency in the sms that are marked as spam
+spamSMS <- subset(rawInputData, rawInputData$Type=="spam")
+corpusSpam <- VCorpus(VectorSource(spamSMS$Text))
+corpusSpam <- tm_map(corpusSpam, removeNumbers)
+corpusSpam <- tm_map(corpusSpam, removePunctuation)
+corpusSpam <- tm_map(corpusSpam, removeWords, stopwords())
+corpusSpam <- tm_map(corpusSpam, stripWhitespace)
+corpusSpam <- tm_map(corpusSpam, stemDocument)
+wordcloud(corpusSpam, min.freq = 100, random.order = FALSE, color = (colors = c("#4575b4","#74add1","#abd9e9","#e0f3f8","#fee090","#fdae61","#f46d43","#d73027")))
+
+
 # Train Test Split for 70% to training and 30% to testing
 sample.size <- floor(0.70 * nrow(rawInputData))
 set.seed(123)
@@ -25,7 +55,6 @@ corpusTrain <- tm_map(corpusTrain, removePunctuation)
 corpusTrain <- tm_map(corpusTrain, removeWords, stopwords())
 corpusTrain <- tm_map(corpusTrain, stripWhitespace)
 corpusTrain <- tm_map(corpusTrain, stemDocument)
-
 
 # Preprocess Train data using corpus which includes rmeoving numbers, remove Puncutuation, remove stop words, strip white spaces, and stemming
 corpusTest <- VCorpus(VectorSource(testData))
@@ -49,7 +78,6 @@ for(i in 1:length(corpusTrain[[2]]$content)){
   }
 }
 
-
 cleanTestData <- c()
 cleanTestLabels <- c()
 for(i in 1:length(corpusTest[[2]]$content)){
@@ -62,7 +90,6 @@ for(i in 1:length(corpusTest[[2]]$content)){
       cleanTestLabels<-c(cleanTestLabels,0)
   }
 }
-
 
 # Our tokenizer function
 tokenizer <- text_tokenizer(num_words = 10000, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n",
@@ -111,3 +138,19 @@ results <- model %>% evaluate(finalTestingData, finalTestingLabels)
 
 # Printing result 
 results
+
+sample.size <- floor(0.70 * nrow(finalTrainingData))
+set.seed(123)
+val_indices <- sample(seq_len(nrow(finalTrainingData)), size = sample.size)
+x_val <- finalTrainingData[val_indices,]
+partial_x_train <- finalTrainingData[-val_indices,]
+y_val <- finalTrainingLabels[val_indices]
+partial_y_train <- finalTrainingLabels[-val_indices]
+
+history <- model %>% fit(
+  partial_x_train,
+  partial_y_train,
+  epochs = 20,
+  batch_size = 512,
+  validation_data = list(x_val, y_val)
+)
