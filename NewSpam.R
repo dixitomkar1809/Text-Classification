@@ -139,6 +139,95 @@ results <- model %>% evaluate(finalTestingData, finalTestingLabels)
 # Printing result 
 results
 
+# Model 2
+model <- keras_model_sequential() %>%
+  layer_dense(units = 32, activation = "relu",
+              input_shape = c(10000)) %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 1, activation = "tanh")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+# Fitting the training data
+model %>% fit(finalTrainingData, finalTrainingLabels, epochs = 8, batch_size = 512)
+
+# Testing on testing data
+results <- model %>% evaluate(finalTestingData, finalTestingLabels)
+
+# Printing result 
+results
+
+# Model 3
+model <- keras_model_sequential() %>%
+  layer_dense(units = 32, activation = "tanh", input_shape = c(10000)) %>%
+  layer_dense(units = 32, activation = "tanh") %>%
+  layer_dense(units = 32, activation = "tanh") %>%
+  layer_dense(units = 1, activation = "tanh")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("accuracy")
+)
+
+# Fitting the training data
+model %>% fit(finalTrainingData, finalTrainingLabels, epochs = 12, batch_size = 512)
+
+# Testing on testing data
+results <- model %>% evaluate(finalTestingData, finalTestingLabels)
+
+# Printing result 
+results
+
+# Model 4
+model <- keras_model_sequential() %>%
+  layer_dense(units = 16, activation = "sigmoid", input_shape = c(10000)) %>%
+  layer_dense(units = 16, activation = "sigmoid") %>%
+  layer_dense(units = 16, activation = "sigmoid") %>%
+  layer_dense(units = 16, activation = "sigmoid")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "mse",
+  metrics = c("accuracy")
+)
+
+# Fitting the training data
+model %>% fit(finalTrainingData, finalTrainingLabels, epochs = 8, batch_size = 512)
+
+# Testing on testing data
+results <- model %>% evaluate(finalTestingData, finalTestingLabels)
+
+# Printing result 
+results
+
+# Model 5
+model <- keras_model_sequential() %>%
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 16, activation = "relu")
+
+model %>% compile(
+  optimizer = "rmsprop",
+  loss = "mse",
+  metrics = c("accuracy")
+)
+
+# Fitting the training data
+model %>% fit(finalTrainingData, finalTrainingLabels, epochs = 10, batch_size = 512)
+
+# Testing on testing data
+results <- model %>% evaluate(finalTestingData, finalTestingLabels)
+
+# Printing result 
+results
+
 sample.size <- floor(0.70 * nrow(finalTrainingData))
 set.seed(123)
 val_indices <- sample(seq_len(nrow(finalTrainingData)), size = sample.size)
